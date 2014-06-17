@@ -1,0 +1,82 @@
+<html>
+<head>
+    <title>Walkabout</title>
+    <style>
+      canvas { 
+        width: 100%; 
+        height: 100% 
+      }
+      body {
+        margin: 0;
+      }
+    </style>
+</head>
+<body>
+
+<div id="render" class="render"></div>
+<div id="labels" class="labels"></div>
+
+<!--
+  Vendor specific includes go first.
+-->
+<script type="text/javascript" src="js/vendor/dat.gui.min.js"></script>
+<script type="text/javascript" src="js/vendor/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="js/vendor/threexresize.js"></script>
+<script type="text/javascript" src="js/vendor/threex.objcoord.js"></script>
+<script type="text/javascript" src="js/vendor/two.min.js"></script>
+<script type="text/javascript" src="js/vendor/Three.js"></script>
+<script type="text/javascript" src="js/vendor/stats.js"></script>
+<script type="text/javascript" src="js/vendor/OrbitControls.js"></script>
+
+<script type="text/javascript">
+  $(function(){
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 5000 );
+
+    var renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor( 0xffffff );
+    document.body.appendChild( renderer.domElement );
+
+    camera.position.set( 100, 100, 100 );
+    camera.lookAt( new THREE.Vector3(0,0,0) );
+
+    var controls = new THREE.OrbitControls( camera, renderer.domElement );
+    controls.center.set( 0, 0, 0 );
+    controls.userPanSpeed = 0.3;
+
+    var hemiLight = new THREE.HemisphereLight( 0xffffff, 0x404040, 0.9 );
+    hemiLight.color.setHSL( 0.55, 1, 1.0 );
+    hemiLight.groundColor.setHSL( 0.095, 1, 0.5 );
+    hemiLight.position.set( 0, 500, 0 );
+
+    var pLight = new THREE.PointLight( 0xffffff, .5, 10000 );
+    pLight.position.set( 500, 500, 500 );
+    scene.add( pLight );
+    scene.add( hemiLight );
+
+    var geometry = new THREE.CubeGeometry(10,10,10);
+    var material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+    var cube = new THREE.Mesh( geometry, material );
+
+    var size = 1000;
+    var step = 10;
+    var gridHelper = new THREE.GridHelper( size, step );
+
+    gridHelper.position = new THREE.Vector3( 0, 0, 0 );
+
+    scene.add( gridHelper );
+    scene.add( cube );
+
+    function render() {
+      requestAnimationFrame(render);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    render();
+
+  });
+</script>
+
+</body>
+</html>
