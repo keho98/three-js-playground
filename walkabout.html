@@ -15,10 +15,12 @@
 
 <div id="render" class="render"></div>
 <div id="labels" class="labels"></div>
-<div id="instructions">
-        <span style="font-size:40px">Click to play</span>
-        <br />
-        (W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
+<div id="blocker">
+  <div id="instructions">
+          <span style="font-size:40px">Click to play</span>
+          <br />
+          (W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
+  </div>
 </div>
 
 
@@ -37,6 +39,7 @@
 <script type="text/javascript">
   $(function(){
 
+    var blocker = document.getElementById( 'blocker' );
     var instructions = document.getElementById( 'instructions' );
     var controls;
       // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
@@ -136,6 +139,56 @@
 
     scene.add( gridHelper );
     scene.add( cube );
+
+    var cubeMap = new THREE.Texture( [] );
+    cubeMap.format = THREE.RGBFormat;
+    cubeMap.flipY = false;
+
+    var loader = new THREE.ImageLoader();
+    loader.load( 'textures/skyboxsun25degtest.png', function ( image ) {
+
+      var getSide = function ( x, y ) {
+
+        var size = 1024;
+
+        var canvas = document.createElement( 'canvas' );
+        canvas.width = size;
+        canvas.height = size;
+
+        var context = canvas.getContext( '2d' );
+        context.drawImage( image, - x * size, - y * size );
+
+        return canvas;
+
+      };
+
+      cubeMap.image[ 0 ] = getSide( 2, 1 ); // px
+      cubeMap.image[ 1 ] = getSide( 0, 1 ); // nx
+      cubeMap.image[ 2 ] = getSide( 1, 0 ); // py
+      cubeMap.image[ 3 ] = getSide( 1, 2 ); // ny
+      cubeMap.image[ 4 ] = getSide( 1, 1 ); // pz
+      cubeMap.image[ 5 ] = getSide( 3, 1 ); // nz
+      cubeMap.needsUpdate = true;
+
+    } );
+
+    var cubeShader = THREE.ShaderLib['cube'];
+    cubeShader.uniforms['tCube'].value = cubeMap;
+
+    var skyBoxMaterial = new THREE.ShaderMaterial( {
+      fragmentShader: cubeShader.fragmentShader,
+      vertexShader: cubeShader.vertexShader,
+      uniforms: cubeShader.uniforms,
+      depthWrite: false,
+      side: THREE.BackSide
+    });
+
+    var skyBox = new THREE.Mesh(
+      new THREE.BoxGeometry( 1000000, 1000000, 1000000 ),
+      skyBoxMaterial
+    );
+    
+    scene.add( skyBox );
 
     function render() {
       requestAnimationFrame(render);
